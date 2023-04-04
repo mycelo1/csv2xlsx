@@ -264,7 +264,7 @@ def gen_xl_shared_strings_xml(workbook_strings):
 	return result_string.translate(str.maketrans('', '', '\t\n\r'))
 
 
-def gen_xl_worksheets_sheetN_xml(sheet_headers, sheet_widths, sheet_rows, workbook_strings, tab_selected):
+def gen_xl_worksheets_sheetN_xml(sheet_headers, sheet_widths, sheet_rows, tab_selected):
 	result_string = """
 		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 		<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">
@@ -331,7 +331,7 @@ def main():
 				zip_file_handle.writestr('xl/sharedStrings.xml', gen_xl_shared_strings_xml(workbook_strings))
 				for sheet in sheets:
 					sheet_id, _, sheet_headers, sheet_widths, sheet_rows = sheet
-					zip_file_handle.writestr('xl/worksheets/sheet{}.xml'.format(sheet_id), gen_xl_worksheets_sheetN_xml(sheet_headers, sheet_widths, sheet_rows, workbook_strings, sheet_id == 1))
+					zip_file_handle.writestr('xl/worksheets/sheet{}.xml'.format(sheet_id), gen_xl_worksheets_sheetN_xml(sheet_headers, sheet_widths, sheet_rows, sheet_id == 1))
 		with open(temp_file_name, 'rb') as src_file, open(xlsx_file_name, 'wb') as dst_file:
 			dst_file.write(src_file.read())
 	finally:
