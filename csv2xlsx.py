@@ -1,4 +1,4 @@
-import os, sys, os.path, csv, tempfile, zipfile, datetime, re, base64
+import os, sys, os.path, csv, tempfile, zipfile, datetime, re, base64, xml.sax.saxutils
 
 
 def excel_column_name(column_index):
@@ -379,7 +379,7 @@ def gen_xl_shared_strings_xml(workbook_strings):
 		<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="{}" uniqueCount="{}">
 	""".format(len(workbook_strings), len(workbook_strings))
 	for csv_string in sorted(workbook_strings, key=workbook_strings.get):
-		result_string += '<si><t>{}</t></si>'.format(csv_string)
+		result_string += '<si><t>{}</t></si>'.format(xml.sax.saxutils.escape(csv_string))
 	result_string += '</sst>'
 	return result_string.translate(str.maketrans('', '', '\t\n\r'))
 
