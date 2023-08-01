@@ -428,18 +428,21 @@ def gen_xl_worksheets_sheetN_xml(sheet_headers, sheet_widths, sheet_rows, tab_se
 
 
 def main():
-	temp_file_name = ''
 	if os.path.isfile(xlsx_file_name):
 		raise Exception("file '{}' already exists".format(xlsx_file_name))
+	temp_file_name = ''
 	try:
 		workbook_strings = {}
 		sheets = []
 		for csv_file_name in csv_file_names:
+			print("reading '{}'".format(csv_file_name))
 			sheet_headers, sheet_widths, sheet_rows = read_csv(csv_file_name, delimiter, workbook_strings)
 			sheets.append((len(sheets) + 1, os.path.splitext(os.path.basename(csv_file_name))[0][:30], sheet_headers, sheet_widths, sheet_rows))
 		with tempfile.NamedTemporaryFile(delete=False) as temp_file_handle:
 			temp_file_name = temp_file_handle.name
+			print("creating '{}'".format(temp_file_name))
 			with zipfile.ZipFile(temp_file_handle, mode='w') as zip_file_handle:
+				print("writing header files")
 				zip_file_handle.writestr('[Content_Types].xml', gen_content_types_xml())
 				zip_file_handle.writestr('_rels/.rels', gen__rels_dotrels())
 				zip_file_handle.writestr('docProps/app.xml', gen_docProps_app_xml(sheets))
@@ -448,16 +451,20 @@ def main():
 				zip_file_handle.writestr('xl/theme/theme1.xml', gen_xl_theme_theme_xml())
 				zip_file_handle.writestr('xl/styles.xml', gen_xl_styles_style_xml())
 				zip_file_handle.writestr('xl/workbook.xml', gen_xl_workbook_xml(sheets))
+				print('writing shared strings')
 				zip_file_handle.writestr('xl/sharedStrings.xml', gen_xl_shared_strings_xml(workbook_strings))
 				for sheet in sheets:
-					sheet_id, _, sheet_headers, sheet_widths, sheet_rows = sheet
+					sheet_id, sheet_name, sheet_headers, sheet_widths, sheet_rows = sheet
+					print("writing sheet '{}'".format(sheet_name))
 					zip_file_handle.writestr('xl/worksheets/sheet{}.xml'.format(sheet_id), gen_xl_worksheets_sheetN_xml(sheet_headers, sheet_widths, sheet_rows, sheet_id == 1))
+		print("moving '{}' to '{}'".format(temp_file_name, xlsx_file_name))
 		with open(temp_file_name, 'rb') as src_file, open(xlsx_file_name, 'wb') as dst_file:
 			dst_file.write(src_file.read())
 	finally:
 		if os.path.isfile(temp_file_name):
+			print("removing '{}'".format(temp_file_name))
 			os.remove(temp_file_name)
-
+	print('done')
 
 # parameters
 xlsx_file_name = sys.argv[1] + '.xlsx'
@@ -468,3 +475,4 @@ author_name = 'author_name'
 # entry point
 if __name__ == "__main__":
 	main()
+
